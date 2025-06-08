@@ -1,0 +1,10 @@
+{
+  "name": "LifeOrchestrator AI - بهینه سازی",
+  "description": "An AI-powered platform to intelligently harmonize life's elements for growth, productivity, and well-being, acting as your comprehensive assistant for flourishing.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ],
+  "prompt": ""
+}

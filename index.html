@@ -1,0 +1,988 @@
+
+
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.3.0",
+    "react-transition-group": "https://esm.sh/react-transition-group@^4.4.5",
+    "@/": "./components/",
+    "@/shared/CollapsibleSection": "./components/shared/CollapsibleSection.tsx",
+    "@/shared/AppIcons": "./components/shared/AppIcons.tsx",
+    "@/layout/": "./components/layout/",
+    "@/routing/": "./components/routing/",
+    "@/health/": "./components/health/",
+    "@/utils": "./utils.ts",
+    "@/contexts/": "./contexts/",
+    "@/types/": "./types/"
+  }
+}
+</script>
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LifeOrchestrator AI - Your Life, Orchestrated</title>
+    <meta name="description" content="پلتفرم ارکستراسیون زندگی مبتنی بر هوش مصنوعی برای دستیابی به اهداف، ایجاد عادت‌های پایدار و بهبود کیفیت زندگی.">
+    <meta name="keywords" content="هوش مصنوعی, ارکستراسیون زندگی, مدیریت وظایف, اهداف, عادت‌ها, بهره‌وری, دستیار شخصی, LifeOrchestrator AI, AI Life Orchestration, Task Management, Goals, Habits, Productivity, Personal Assistant">
+    <meta name="theme-color" content="#1e293b"> <!-- slate-800 -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+      @font-face {
+        font-family: 'Vazirmatn';
+        src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Vazirmatn';
+        src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Vazirmatn';
+        src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
+        font-weight: 500; /* Medium */
+        font-style: normal;
+        font-display: swap;
+      }
+       @font-face {
+        font-family: 'Vazirmatn';
+        src: url('/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+        font-weight: 600; /* SemiBold */
+        font-style: normal;
+        font-display: swap;
+      }
+
+      body {
+        font-family: 'Vazirmatn', sans-serif;
+        background-color: #f8fafc; /* bg-slate-50 */
+        direction: rtl;
+        overscroll-behavior-y: contain; /* Prevents pull-to-refresh on body */
+      }
+      
+      /* Global scrollbar styling */
+      /* For Webkit browsers (Chrome, Safari) */
+      ::-webkit-scrollbar {
+        width: 8px; /* width of the entire scrollbar */
+        height: 8px; /* height of the entire scrollbar (for horizontal scroll) */
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9; /* bg-slate-100 - track color */
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8; /* bg-slate-400 - thumb color */
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* bg-slate-500 - thumb hover color */
+      }
+
+      /* For Firefox */
+      html { /* Apply to html for Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9; /* thumb and track color */
+      }
+      
+      /* For Edge and IE (less common now) */
+      body {
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+      }
+
+      /* Placeholder styling for app container if needed */
+      #root {
+        /* max-width: 480px; /* Example for mobile-first view */
+        /* margin: 0 auto; */
+        /* background-color: white; */
+        /* min-height: 100vh; */
+        /* box-shadow: 0 0 20px rgba(0,0,0,0.1); */
+      }
+      .app-container {
+        max-width: 480px; /* Or your desired max-width */
+        margin: 0 auto;
+        background-color: #f8fafc; /* Default page background */
+        min-height: 100vh; /* Full height */
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden; /* Prevent horizontal scroll on the main container */
+      }
+      .app-main-content {
+        flex-grow: 1;
+        padding-bottom: 70px; /* Space for bottom nav */
+        overflow-y: auto; /* Allow content to scroll */
+        display: flex; /* Added */
+        flex-direction: column; /* Added */
+      }
+      .page {
+        padding: 1rem; /* Standard padding for pages */
+        flex-grow: 1; /* Added - This will make the .page div expand to fill its parent .app-main-content */
+      }
+      .bg-dashboard-page { background-color: var(--page-bg-dashboard, #eff6ff); }
+      .bg-goals-page { background-color: var(--page-bg-goals, #f0f9ff); }
+      .bg-tasks-page { background-color: var(--page-bg-tasks, #f5f3ff); }
+      .bg-habits-page { background-color: var(--page-bg-habits, #fdf4ff); }
+      .bg-health-page { background-color: var(--page-bg-health, #fef2f2); }
+      .bg-learning-page { background-color: var(--page-bg-learning, #f0fdf4); }
+      .bg-finance-page { background-color: var(--page-bg-finance, #f0fdfa); }
+      .bg-travel-page { background-color: #eff6ff; } 
+      .bg-smarthome-page { background-color: var(--page-bg-smarthome, #f1f5f9); }
+      .bg-family-page { background-color: #fff1f2; } /* Rose 50, as requested */
+      .bg-community-page { background-color: var(--page-bg-community, #ecfdf5); }
+      .bg-personalization-page { background-color: var(--page-bg-personalization, #f3f4f6); }
+      .bg-privacy-page { background-color: var(--page-bg-privacy, #e0f2fe); } /* Light Sky Blue */
+      .bg-infrastructure-page { background-color: var(--page-bg-infrastructure, #f1f5f9); }
+      .bg-reports-page { background-color: var(--page-bg-reports, #eef2ff); }
+      .bg-sky-50 { background-color: #f0f9ff; } /* Used by LifeProjects */
+
+
+      /* Dark Theme Variables (Example) - These would be applied via JS to body */
+      .theme-ocean {
+        --page-bg-dashboard: #0c4a6e; /* sky-800 */
+        --color-primary-accent: #0ea5e9; /* sky-500 */
+      }
+       .theme-forest {
+        --page-bg-dashboard: #14532d; /* green-900 */
+        --color-primary-accent: #22c55e; /* green-500 */
+      }
+      
+      /* Basic FAB styles */
+      .fab-container { position: fixed; bottom: calc(68px + 1rem); /* Above nav bar + margin */ right: 1rem; z-index: 100; display: flex; flex-direction: column-reverse; align-items: center; }
+      .fab-button { width: 56px; height: 56px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease-in-out; border: none; cursor: pointer; }
+      .fab-option-item { background-color: white; color: #374151; /* gray-700 */ padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 10px; display: flex; align-items: center; font-size: 0.875rem; cursor: pointer; transition: opacity 0.25s ease-out, transform 0.25s ease-out; white-space: nowrap; border: 1px solid #e5e7eb; /* gray-200 */ }
+      .fab-option-item:hover { background-color: #f3f4f6; /* gray-100 */ }
+      .fab-options-enter { opacity: 0; transform: translateY(10px) scale(0.95); }
+      .fab-options-active { opacity: 1; transform: translateY(0) scale(1); }
+      .fab-options-exit { opacity: 1; transform: translateY(0) scale(1); }
+      .fab-options-exit-active { opacity: 0; transform: translateY(10px) scale(0.95); }
+      .fab-visible { --toast-bottom-spacing: calc(68px + 1rem + 56px + 1rem); }
+      body:not(.fab-visible) { --toast-bottom-spacing: calc(68px + 1rem); }
+
+      /* Bottom Navigation Bar */
+      .app-footer-nav { box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
+      .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; font-size: 10px; color: #6b7280; /* gray-500 */ transition: color 0.2s ease-in-out, transform 0.1s ease-out; border: none; background: none; cursor: pointer; }
+      .nav-item > svg { margin-bottom: 2px; transition: transform 0.2s ease-out; }
+      .nav-item > span { line-height: 1.2; }
+      .nav-item.active { color: #4f46e5; /* indigo-600 */ font-weight: 500; }
+      .nav-item.active > svg { transform: scale(1.1); }
+      .nav-item:active { transform: scale(0.95); }
+      
+      /* General Modal Styling (can be improved) */
+      .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+      .modal-overlay.active { opacity: 1; visibility: visible; }
+      .modal-content { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 90%; max-width: 500px; transform: scale(0.95); transition: transform 0.3s ease; max-height: 85vh; overflow-y: auto; }
+      .modal-overlay.active .modal-content { transform: scale(1); }
+      
+      .full-screen-modal-overlay { position: fixed; inset: 0; background-color: rgba(248, 250, 252, 0.95); /* bg-slate-50 with opacity */ backdrop-filter: blur(5px); z-index: 1000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+      .full-screen-modal-overlay.active { opacity: 1; visibility: visible; }
+      .full-screen-modal-content { background-color: #ffffff; /* white */ width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.25rem; /* p-5 */ transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+      .full-screen-modal-overlay.active .full-screen-modal-content { transform: translateY(0); }
+      .modal-scroll-content { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; /* slate-300 slate-100 */ }
+      .modal-scroll-content::-webkit-scrollbar { width: 6px; }
+      .modal-scroll-content::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+      .modal-scroll-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+      .modal-scroll-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+
+      /* AI Parsing Preview Styling */
+      .ai-parsing-preview { background-color: #e0e7ff; /* indigo-100 */ border: 1px solid #c7d2fe; /* indigo-200 */ padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+      .ai-parsing-preview-title { font-size: 0.875rem; font-weight: 600; color: #4338ca; /* indigo-700 */ margin-bottom: 0.5rem; display:flex; align-items:center; }
+      .ai-parsing-preview-text { font-size: 0.75rem; color: #4f46e5; /* indigo-600 */ margin-bottom: 0.25rem; }
+      .ai-parsing-preview-text strong { color: #3730a3; /* indigo-800 */ }
+      .ai-parsing-preview-text input, .ai-parsing-preview-text select { font-size: 0.75rem; padding: 0.125rem 0.25rem; border: 1px solid #a5b4fc; /* indigo-300 */ border-radius: 0.25rem; background-color: #eef2ff; /* indigo-50 */ }
+      .ai-parsing-preview-xai-button { font-size: 0.625rem; /* text-xs */ color: #4f46e5; /* indigo-600 */ text-decoration: underline; background: none; border: none; cursor: pointer; }
+      .ai-parsing-preview-xai-button:hover { color: #3730a3; /* indigo-800 */ }
+      
+      /* Task Input Icons Styling */
+      .task-input-icons { position: absolute; top: 10px; right: 10px; /* LTR */ display: flex; gap: 8px; }
+      html[dir="rtl"] .task-input-icons { right: auto; left: 10px; }
+      .task-input-icons button { background: none; border: none; cursor: pointer; color: #6b7280; /* gray-500 */ }
+      .task-input-icons button:hover { color: #4f46e5; /* indigo-600 */ }
+      
+      /* Task Breakdown Output Styling */
+      .task-breakdown-output { background-color: #f3e8ff; /* purple-50 */ border: 1px solid #e9d5ff; /* purple-200 */ padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+      .task-breakdown-title { font-size: 0.875rem; font-weight: 600; color: #7e22ce; /* purple-700 */ margin-bottom: 0.5rem; }
+      .task-breakdown-list { list-style-type: disc; padding-right: 1rem; /* RTL */ }
+      html[dir="rtl"] .task-breakdown-list { padding-right: 1rem; padding-left:0; } /* Ensure correct padding for RTL */
+      .task-breakdown-list li { font-size: 0.75rem; color: #581c87; /* purple-800 */ }
+      
+      /* Chat Message Styling */
+      .chat-messages-container { scroll-behavior: smooth; }
+      .chat-message { padding: 0.5rem 0.75rem; border-radius: 0.75rem; max-width: 80%; word-wrap: break-word; font-size: 0.875rem; line-height: 1.4; }
+      .chat-message.user { background-color: #4f46e5; /* indigo-600 */ color: white; margin-left: auto; border-bottom-right-radius: 0.25rem; }
+      html[dir="rtl"] .chat-message.user { margin-right: auto; margin-left: 0; border-bottom-left-radius: 0.25rem; border-bottom-right-radius: 0.75rem; }
+      .chat-message:not(.user) { background-color: #e5e7eb; /* gray-200 */ color: #1f2937; /* gray-800 */ margin-right: auto; border-bottom-left-radius: 0.25rem; }
+      html[dir="rtl"] .chat-message:not(.user) { margin-left: auto; margin-right: 0; border-bottom-right-radius: 0.25rem; border-bottom-left-radius: 0.75rem; }
+      
+      /* Suggestion Card Feedback Animation */
+      .suggestion-button-feedback { display: inline-block; transition: transform 0.3s ease, opacity 0.3s ease; transform: scale(0); opacity: 0; margin-left: 4px; }
+      .suggestion-button-feedback.show { transform: scale(1); opacity: 1; }
+      .suggestion-card-fade-out { animation: fadeOutAndShrink 0.5s forwards; }
+      @keyframes fadeOutAndShrink { 0% { opacity: 1; transform: translateY(0); max-height: 200px; margin-bottom: 1rem; padding: 1rem; border-width: 1px;} 99% { opacity: 0; transform: translateY(-10px); max-height: 0; margin-bottom: 0; padding: 0 1rem; border-width: 1px;} 100% { opacity: 0; transform: translateY(-10px); max-height: 0; margin-bottom: 0; padding: 0; border-width: 0;} }
+      
+      /* Scrollbar for specific elements */
+      .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; /* slate-300 slate-100 for thumb and track */ }
+      .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+      /* Ensure app-header and its h1 are styled if Tailwind is not globally applied to App.tsx */
+      .app-header {
+        padding: 1rem;
+        /* background-color: #fff; /* Example background */
+        /* border-bottom: 1px solid #e5e7eb; /* Example border */
+      }
+      .app-header h1 {
+         font-size: 1.25rem; /* text-xl */
+         font-weight: 700; /* font-bold */
+         text-align: center;
+         color: #374151; /* gray-700 example */
+      }
+
+      /* Global Alerts Container Styling */
+      .global-alerts-container {
+        position: sticky;
+        top: 0;
+        left:0;
+        right:0;
+        z-index: 1500; /* Higher than other elements like FAB or modals that might be 1000 */
+        width: 100%;
+        max-height: 30vh; /* Limit height to avoid taking too much screen */
+        overflow-y: auto; /* Allow scrolling if many alerts */
+        /* background-color: rgba(248, 250, 252, 0.8); /* Slight bg to differentiate if needed, but individual cards have bg */
+        /* backdrop-filter: blur(2px); */ /* Optional: if a slight blur effect is desired under alerts */
+      }
+      .global-alerts-container > div { /* Style for individual AnomalyAlertCard inside */
+        margin-bottom: 0.5rem; /* Spacing between alerts */
+      }
+      .global-alerts-container > div:last-child {
+        margin-bottom: 0;
+      }
+
+      /* Styles for Community Feed Grid */
+      .community-feed-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+        gap: 1rem; /* Space between cards */
+      }
+      /* Ensure an AnomalyAlertCard inside global-alerts-container is using full width if needed */
+      /* .global-alerts-container > .anomaly-alert-card-selector { width: 100%; box-sizing: border-box; } */
+      
+      .anomaly-alert-card-selector { /* General class for anomaly alert card if you plan to use one */
+        /* Add general styling if needed here */
+      }
+
+      /* Family Calendar Event Basic Styling */
+      .family-calendar-event {
+        padding: 2px 4px;
+        margin-bottom: 2px;
+        border-radius: 4px;
+        font-size: 0.65rem; /* text-xs is 0.75rem, this is a bit smaller */
+        line-height: 1.2;
+        color: white;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .event-medical { background-color: #ef4444; } /* red-500 */
+      .event-school { background-color: #3b82f6; } /* blue-500 */
+      .event-birthday { background-color: #f59e0b; } /* amber-500 */
+      .event-gathering { background-color: #10b981; } /* emerald-500 */
+      .event-other { background-color: #6b7280; } /* gray-500 */
+      .event-واکسیناسیون { background-color: #8b5cf6; } /* violet-500 */
+
+      /* Styles for Family Page - Bulletin Board (Conceptual) */
+      .bulletin-board-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem; /* 12px */
+      }
+      .bulletin-post-card {
+        padding: 0.75rem; /* 12px */
+        border-radius: 0.5rem; /* 8px */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        /* Colors are applied via inline style from BulletinPostCard component */
+      }
+      .bulletin-post-yellow { background-color: #fef9c3; border-left: 4px solid #facc15; } /* yellow-100, yellow-500 */
+      .bulletin-post-pink { background-color: #fce7f3; border-left: 4px solid #ec4899; } /* pink-100, pink-500 */
+      .bulletin-post-blue { background-color: #dbeafe; border-left: 4px solid #3b82f6; } /* blue-100, blue-500 */
+      .bulletin-post-green { background-color: #dcfce7; border-left: 4px solid #22c55e; } /* green-100, green-500 */
+      .bulletin-post-purple { background-color: #f3e8ff; border-left: 4px solid #a855f7; } /* purple-100, purple-500 */
+
+
+      /* Tailwind classes for Animate-fadeIn (from CollapsibleSection) */
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+      .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+
+      /* IF TAILWIND CDN IS REMOVED, THESE CLASSES NEED TO BE DEFINED OR A BUILD STEP USED */
+      /* Minimal necessary Tailwind-like classes if CDN is removed */
+      .sticky { position: sticky; }
+      .top-0 { top: 0; }
+      .bg-white\/80 { background-color: rgba(255, 255, 255, 0.8); }
+      .backdrop-blur-md { backdrop-filter: blur(12px); }
+      .z-40 { z-index: 40; }
+      .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+      .print\:hidden { @media print { display: none; } }
+      .text-lg { font-size: 1.125rem; line-height: 1.75rem; } /* 18px */
+      .font-semibold { font-weight: 600; }
+      .text-gray-700 { color: #374151; }
+      .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+      .text-center { text-align: center; }
+      .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+      /* Add any other critical Tailwind classes used in App.tsx or global layout here if CDN is removed */
+
+    </style>
+    <!-- Tailwind CDN and its warning script have been removed. -->
+    <!-- For production, ensure Tailwind is compiled via PostCSS or CLI. -->
+    <!-- Styles might be affected if utility classes were solely from CDN. -->
+    <script type="module" src="./index.tsx"></script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
+```
+  </change>
+  <change>
+    <file>components/health/NutritionPlanner.tsx</file>
+    <description>New component: NutritionPlanner.tsx to handle UI and logic for meal planning.</description>
+    <content><![CDATA[
+import React from 'react';
+import { toPersianDigits } from '@/utils';
+import { MealPlan } from '@/types/healthTypes';
+import { LightbulbIcon, SparklesIconNav } from '@/shared/AppIcons';
+import LoadingSpinner from '@/shared/LoadingSpinner';
+
+interface NutritionPlannerProps {
+  userNutritionPreferences: string;
+  setUserNutritionPreferences: (prefs: string) => void;
+  handleGenerateMealPlan: () => void;
+  isLoadingMealPlan: boolean;
+  mealPlan: MealPlan | null;
+  ai: any; // GoogleGenAI instance
+}
+
+const NutritionPlanner: React.FC<NutritionPlannerProps> = ({
+  userNutritionPreferences,
+  setUserNutritionPreferences,
+  handleGenerateMealPlan,
+  isLoadingMealPlan,
+  mealPlan,
+  ai
+}) => {
+  return (
+    <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 space-y-3">
+      <h4 className="text-sm font-semibold text-gray-700 flex items-center">
+        <LightbulbIcon className="w-4 h-4 text-red-500 mr-2 rtl:ml-2 rtl:mr-0" />
+        {toPersianDigits("برنامه‌ریزی هوشمند تغذیه")}
+      </h4>
+      <div>
+        <label htmlFor="nutritionPrefs" className="block text-xs font-medium text-gray-700 mb-1">
+          {toPersianDigits("ترجیحات غذایی (اهداف، محدودیت‌ها، غذاهای مورد علاقه/مورد تنفر):")}
+        </label>
+        <textarea
+          id="nutritionPrefs"
+          value={userNutritionPreferences}
+          onChange={e => setUserNutritionPreferences(e.target.value)}
+          rows={3}
+          className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-red-500 focus:border-red-500"
+          placeholder={toPersianDigits("مثال: کاهش وزن، گیاهخوار، بدون گلوتن، عاشق سبزیجات، از کلم بروکلی متنفرم")}
+        />
+        <button
+          onClick={handleGenerateMealPlan}
+          disabled={isLoadingMealPlan || !ai || !userNutritionPreferences.trim()}
+          className="w-full text-xs mt-1 py-2 px-3 rounded-md font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-60 flex items-center justify-center"
+        >
+          {isLoadingMealPlan ? <LoadingSpinner size="sm" /> : <SparklesIconNav className="w-4 h-4 mr-1" />}
+          {toPersianDigits("تولید برنامه غذایی با AI")}
+        </button>
+         {!ai && <p className="text-[10px] text-center text-yellow-600 mt-1">{toPersianDigits("(سرویس AI برای این بخش در دسترس نیست)")}</p>}
+      </div>
+      {mealPlan && (
+        <div className="mt-2 p-2 border rounded-md bg-red-50 border-red-200 text-xs">
+          <h5 className="font-semibold text-red-700 mb-1">{toPersianDigits(mealPlan.title)}</h5>
+          <p className="mb-1">{toPersianDigits(mealPlan.aiGeneratedRationale || '')}</p>
+          <p className="text-[10px]">
+            {toPersianDigits(`برای ${mealPlan.durationDays} روز از تاریخ ${new Date(mealPlan.startDate).toLocaleDateString('fa-IR')}`)}
+          </p>
+          {/* TODO: Add more detailed display of meal plan here */}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NutritionPlanner;
+```
+  </change>
+  <change>
+    <file>components/health/ExercisePlanner.tsx</file>
+    <description>New component: ExercisePlanner.tsx to handle UI and logic for exercise planning.</description>
+    <content><![CDATA[
+import React from 'react';
+import { toPersianDigits } from '@/utils';
+import { ExercisePlan } from '@/types/healthTypes';
+import { HeartIcon, SparklesIconNav } from '@/shared/AppIcons';
+import LoadingSpinner from '@/shared/LoadingSpinner';
+
+interface ExercisePlannerProps {
+  userExercisePreferences: string;
+  setUserExercisePreferences: (prefs: string) => void;
+  handleGenerateExercisePlan: () => void;
+  isLoadingExercisePlan: boolean;
+  exercisePlan: ExercisePlan | null;
+  ai: any; // GoogleGenAI instance
+}
+
+const ExercisePlanner: React.FC<ExercisePlannerProps> = ({
+  userExercisePreferences,
+  setUserExercisePreferences,
+  handleGenerateExercisePlan,
+  isLoadingExercisePlan,
+  exercisePlan,
+  ai
+}) => {
+  return (
+    <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 space-y-3">
+      <h4 className="text-sm font-semibold text-gray-700 flex items-center">
+        <HeartIcon className="w-4 h-4 text-red-500 mr-2 rtl:ml-2 rtl:mr-0" />
+        {toPersianDigits("برنامه‌ریزی هوشمند ورزش")}
+      </h4>
+      <div>
+        <label htmlFor="exercisePrefs" className="block text-xs font-medium text-gray-700 mb-1">
+          {toPersianDigits("ترجیحات ورزشی (اهداف، نوع ورزش، مدت زمان، تجهیزات):")}
+        </label>
+        <textarea
+          id="exercisePrefs"
+          value={userExercisePreferences}
+          onChange={e => setUserExercisePreferences(e.target.value)}
+          rows={3}
+          className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-red-500 focus:border-red-500"
+          placeholder={toPersianDigits("مثال: افزایش قدرت، ۳ روز در هفته، ۳۰ دقیقه، فقط دمبل و وزن بدن")}
+        />
+        <button
+          onClick={handleGenerateExercisePlan}
+          disabled={isLoadingExercisePlan || !ai || !userExercisePreferences.trim()}
+          className="w-full text-xs mt-1 py-2 px-3 rounded-md font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-60 flex items-center justify-center"
+        >
+          {isLoadingExercisePlan ? <LoadingSpinner size="sm" /> : <SparklesIconNav className="w-4 h-4 mr-1" />}
+          {toPersianDigits("تولید برنامه ورزشی با AI")}
+        </button>
+        {!ai && <p className="text-[10px] text-center text-yellow-600 mt-1">{toPersianDigits("(سرویس AI برای این بخش در دسترس نیست)")}</p>}
+      </div>
+      {exercisePlan && (
+        <div className="mt-2 p-2 border rounded-md bg-red-50 border-red-200 text-xs">
+          <h5 className="font-semibold text-red-700 mb-1">{toPersianDigits(exercisePlan.title)}</h5>
+          <p className="mb-1">{toPersianDigits(exercisePlan.aiGeneratedRationale || '')}</p>
+          <p className="text-[10px]">
+            {toPersianDigits(`برای ${exercisePlan.durationWeeks} هفته از تاریخ ${new Date(exercisePlan.startDate).toLocaleDateString('fa-IR')}`)}
+          </p>
+          {/* TODO: Add more detailed display of exercise plan here */}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ExercisePlanner;
+```
+  </change>
+  <change>
+    <file>components/health/JournalAnalysis.tsx</file>
+    <description>New component: JournalAnalysis.tsx to handle journal input and AI-driven analysis.</description>
+    <content><![CDATA[
+import React from 'react';
+import { toPersianDigits } from '@/utils';
+import { JournalEntryHealth } from '@/types/healthTypes';
+import { PencilSquareIcon, SparklesIconNav } from '@/shared/AppIcons';
+import LoadingSpinner from '@/shared/LoadingSpinner';
+
+interface JournalAnalysisProps {
+  currentJournalInput: string;
+  setCurrentJournalInput: (input: string) => void;
+  handleAnalyzeJournalEntry: () => void;
+  isLoadingJournalAnalysis: boolean;
+  journalEntries: JournalEntryHealth[];
+  ai: any; // GoogleGenAI instance
+}
+
+const JournalAnalysis: React.FC<JournalAnalysisProps> = ({
+  currentJournalInput,
+  setCurrentJournalInput,
+  handleAnalyzeJournalEntry,
+  isLoadingJournalAnalysis,
+  journalEntries,
+  ai
+}) => {
+  return (
+    <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-200">
+      <h4 className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+        <PencilSquareIcon className="w-4 h-4 text-red-500 mr-2 rtl:ml-2 rtl:mr-0" />
+        {toPersianDigits("تحلیل احساسات و استرس از دفترچه یادداشت")}
+      </h4>
+      <textarea
+        value={currentJournalInput}
+        onChange={e => setCurrentJournalInput(e.target.value)}
+        placeholder={toPersianDigits("احساسات و افکار امروز خود را بنویسید...")}
+        rows={4}
+        className="w-full p-2 border border-gray-300 rounded-md text-xs mb-2 focus:ring-red-500 focus:border-red-500"
+      />
+      <button
+        onClick={handleAnalyzeJournalEntry}
+        disabled={isLoadingJournalAnalysis || !currentJournalInput.trim() || !ai}
+        className="w-full text-xs py-2 px-3 rounded-md font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-60 flex items-center justify-center"
+      >
+        {isLoadingJournalAnalysis ? <LoadingSpinner size="sm" /> : <SparklesIconNav className="w-4 h-4 mr-1" />}
+        {toPersianDigits("ثبت و تحلیل با AI")}
+      </button>
+      {!ai && <p className="text-[10px] text-center text-yellow-600 mt-1">{toPersianDigits("(سرویس AI برای این بخش در دسترس نیست)")}</p>}
+
+      {journalEntries.length > 0 && (
+        <div className="mt-3 space-y-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
+          {journalEntries.slice(0, 3).map(entry => (
+            <div key={entry.id} className="p-2 border border-red-100 rounded-md bg-red-50 text-xs">
+              <p className="font-medium text-red-700">{new Date(entry.date).toLocaleString('fa-IR')}</p>
+              <p className="text-gray-700 whitespace-pre-wrap my-1">
+                {toPersianDigits(entry.text.substring(0, 100) + (entry.text.length > 100 ? "..." : ""))}
+              </p>
+              {entry.sentimentAnalysis && (
+                <p className="text-[10px] text-gray-600">
+                  <strong>{toPersianDigits("احساس:")}</strong> {toPersianDigits(entry.sentimentAnalysis.label)} ({toPersianDigits(entry.sentimentAnalysis.dominantEmotion || '')}) - <strong>{toPersianDigits("استرس:")}</strong> {toPersianDigits(entry.sentimentAnalysis.stressLevel || 'نامشخص')}
+                </p>
+              )}
+              {entry.aiInsight && (
+                <p className="text-[10px] text-purple-700 mt-0.5">
+                  <strong>{toPersianDigits("بینش AI:")}</strong> {toPersianDigits(entry.aiInsight)}
+                </p>
+              )}
+            </div>
+          ))}
+          {journalEntries.length > 3 && <p className="text-center text-[10px] text-gray-500 mt-1">... و بیشتر</p>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default JournalAnalysis;
+```
+  </change>
+  <change>
+    <file>components/health/SymptomCheckerChatbot.tsx</file>
+    <description>New component: SymptomCheckerChatbot.tsx to manage the symptom checker UI and interactions.</description>
+    <content><![CDATA[
+import React, { RefObject } from 'react';
+import { toPersianDigits } from '@/utils';
+import { SymptomCheckSession, SymptomCheckMessage } from '@/types/healthTypes';
+import { ChatBubbleOvalLeftEllipsisIcon, ShieldCheckIcon, PaperAirplaneIcon } from '@/shared/AppIcons';
+import LoadingSpinner from '@/shared/LoadingSpinner';
+
+interface SymptomCheckerChatbotProps {
+  isSymptomDisclaimerAccepted: boolean;
+  setIsSymptomDisclaimerAccepted: (accepted: boolean) => void;
+  currentSymptomSession: SymptomCheckSession | null;
+  symptomInput: string;
+  setSymptomInput: (input: string) => void;
+  handleSymptomChatSend: () => void;
+  handleEndSymptomChat: () => void;
+  isLoadingSymptomResponse: boolean;
+  chatMessagesEndRef: RefObject<HTMLDivElement>;
+  ai: any; // GoogleGenAI instance
+}
+
+const SymptomCheckerChatbot: React.FC<SymptomCheckerChatbotProps> = ({
+  isSymptomDisclaimerAccepted,
+  setIsSymptomDisclaimerAccepted,
+  currentSymptomSession,
+  symptomInput,
+  setSymptomInput,
+  handleSymptomChatSend,
+  handleEndSymptomChat,
+  isLoadingSymptomResponse,
+  chatMessagesEndRef,
+  ai
+}) => {
+  return (
+    <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-200">
+      <h4 className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+        <ChatBubbleOvalLeftEllipsisIcon className="w-4 h-4 text-red-500 mr-2 rtl:ml-2 rtl:mr-0" />
+        {toPersianDigits("چت‌بات بررسی‌کننده علائم با AI")}
+      </h4>
+      {!isSymptomDisclaimerAccepted ? (
+        <div className="p-2 bg-yellow-50 border border-yellow-300 rounded-md text-xs text-yellow-800">
+          <div className="flex items-start">
+            <ShieldCheckIcon className="w-6 h-6 text-yellow-600 mr-2 rtl:ml-2 rtl:mr-0 flex-shrink-0" />
+            <p>
+              <strong>{toPersianDigits("سلب مسئولیت مهم:")}</strong> {toPersianDigits("این چت‌بات یک ابزار تشخیص پزشکی نیست و صرفاً برای اهداف اطلاعاتی و کمک اولیه طراحی شده است. برای تشخیص و درمان بیماری‌ها حتماً به پزشک مراجعه کنید.")}
+            </p>
+          </div>
+          <button onClick={() => setIsSymptomDisclaimerAccepted(true)} className="mt-2 bg-yellow-500 text-white py-1 px-2 rounded text-[10px] hover:bg-yellow-600">
+            {toPersianDigits("می‌پذیرم و ادامه می‌دهم")}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col h-80">
+          <div className="flex-grow overflow-y-auto mb-2 p-2 border border-gray-200 rounded-md space-y-2 bg-gray-50 chat-messages-container">
+            {currentSymptomSession?.messages.map(msg => (
+              <div key={msg.id} className={`chat-message ${msg.sender === 'user' ? 'user !bg-red-500' : '!bg-gray-200'}`}>
+                {toPersianDigits(msg.text)}
+              </div>
+            ))}
+            {isLoadingSymptomResponse && <div className="chat-message !bg-gray-200"><LoadingSpinner size="sm" /></div>}
+            <div ref={chatMessagesEndRef} />
+          </div>
+          <div className="flex gap-2 items-center mt-auto">
+            <input
+              type="text"
+              value={symptomInput}
+              onChange={e => setSymptomInput(e.target.value)}
+              placeholder={toPersianDigits("علائم خود را وارد کنید...")}
+              className="flex-grow p-2 border border-gray-300 rounded-md text-xs focus:ring-red-500 focus:border-red-500"
+              onKeyPress={(e) => e.key === 'Enter' && !isLoadingSymptomResponse && symptomInput.trim() && handleSymptomChatSend()}
+            />
+            <button
+              onClick={handleSymptomChatSend}
+              disabled={isLoadingSymptomResponse || !symptomInput.trim() || !ai}
+              className="py-2 px-3 rounded-md font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-60 text-xs"
+            >
+              {toPersianDigits("ارسال")}
+            </button>
+          </div>
+          {!ai && <p className="text-[10px] text-center text-yellow-600 mt-1">{toPersianDigits("(سرویس AI برای این بخش در دسترس نیست)")}</p>}
+          {currentSymptomSession && (
+            <button onClick={handleEndSymptomChat} className="text-xs text-red-600 hover:text-red-800 mt-2 w-full">
+              {toPersianDigits("پایان و ذخیره جلسه")}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SymptomCheckerChatbot;
+```
+  </change>
+  <change>
+    <file>components/pages/HealthPage.tsx</file>
+    <description>Refactor HealthPage.tsx to use new sub-components: NutritionPlanner, ExercisePlanner, JournalAnalysis, and SymptomCheckerChatbot. State management and AI interaction logic remain in HealthPage and are passed down as props.</description>
+    <content><![CDATA[
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { toPersianDigits, parseJsonFromString } from '../../utils';
+import { 
+    HeartIcon as PageIcon, 
+    BookIcon, 
+    LightbulbIcon, 
+    SparklesIconNav as AiIcon, 
+    ChatBubbleOvalLeftEllipsisIcon as ChatIcon,
+    CameraIcon,
+    ShieldCheckIcon, 
+    PencilSquareIcon 
+} from '@/shared/AppIcons'; // Updated path
+import AISmartLearningSuggestionCard from '@/learning/AISmartLearningSuggestionCard'; // Updated path
+import { LearningPath, LearningContent, LearningSuggestion } from '@/types/learningTypes'; // Updated path
+import { PageName } from '@/App'; // Updated path
+import { MealPlan, ExercisePlan, JournalEntryHealth, SymptomCheckSession, SymptomCheckMessage } from '@/types/healthTypes'; // Updated path
+import CollapsibleSection from '@/shared/CollapsibleSection'; // Updated path
+import LoadingSpinner from '@/shared/LoadingSpinner'; // Updated path
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import ToastNotification from '@/shared/ToastNotification'; // Updated path
+
+import NutritionPlanner from '@/health/NutritionPlanner'; // New import
+import ExercisePlanner from '@/health/ExercisePlanner'; // New import
+import JournalAnalysis from '@/health/JournalAnalysis'; // New import
+import SymptomCheckerChatbot from '@/health/SymptomCheckerChatbot'; // New import
+
+const AI_MODEL_NAME = 'gemini-2.5-flash-preview-04-17';
+
+const HEALTH_MEAL_PLAN_KEY = 'healthPage_mealPlan_v2';
+const HEALTH_EXERCISE_PLAN_KEY = 'healthPage_exercisePlan_v2';
+const HEALTH_JOURNAL_ENTRIES_KEY = 'healthPage_journalEntries_v2';
+const HEALTH_SYMPTOM_SESSIONS_KEY = 'healthPage_symptomSessions_v2';
+const HEALTH_NUTRITION_PREFS_KEY = 'healthPage_nutritionPrefs_v1';
+const HEALTH_EXERCISE_PREFS_KEY = 'healthPage_exercisePrefs_v1';
+
+
+interface HealthPageProps {
+  learningPaths?: LearningPath[];
+  learningContent?: LearningContent[];
+  navigateTo?: (pageName: PageName | string, params?: any) => void;
+}
+
+const HealthPage: React.FC<HealthPageProps> = ({ learningPaths = [], learningContent = [], navigateTo }) => {
+  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
+  const [exercisePlan, setExercisePlan] = useState<ExercisePlan | null>(null);
+  const [journalEntries, setJournalEntries] = useState<JournalEntryHealth[]>([]);
+  const [currentJournalInput, setCurrentJournalInput] = useState('');
+  const [symptomSessions, setSymptomSessions] = useState<SymptomCheckSession[]>([]);
+  const [currentSymptomSession, setCurrentSymptomSession] = useState<SymptomCheckSession | null>(null);
+  const [symptomInput, setSymptomInput] = useState('');
+  const [isSymptomDisclaimerAccepted, setIsSymptomDisclaimerAccepted] = useState(false);
+  
+  const [userNutritionPreferences, setUserNutritionPreferences] = useState('');
+  const [userExercisePreferences, setUserExercisePreferences] = useState('');
+
+  const [isLoadingMealPlan, setIsLoadingMealPlan] = useState(false);
+  const [isLoadingExercisePlan, setIsLoadingExercisePlan] = useState(false);
+  const [isLoadingJournalAnalysis, setIsLoadingJournalAnalysis] = useState(false);
+  const [isLoadingSymptomResponse, setIsLoadingSymptomResponse] = useState(false);
+
+  const [healthSuggestions, setHealthSuggestions] = useState<LearningSuggestion[]>([]);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  const [toast, setToast] = useState<{id: number, text: string, type: 'success'|'error'|'info'} | null>(null);
+
+  const [openSections, setOpenSections] = useState({
+    learning: true, planning: true, vision: false, journal: true, symptom: true,
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const ai = process.env.API_KEY ? new GoogleGenAI({ apiKey: process.env.API_KEY }) : null;
+  
+  const showToast = useCallback((text: string, type: 'success'|'error'|'info' = 'info') => {
+    setToast({ id: Date.now(), text: toPersianDigits(text), type });
+  }, []);
+
+  useEffect(() => { if (toast) { const timer = setTimeout(() => setToast(null), 3000); return () => clearTimeout(timer); } }, [toast]);
+
+  useEffect(() => {
+    const storedMealPlan = localStorage.getItem(HEALTH_MEAL_PLAN_KEY); if (storedMealPlan) setMealPlan(JSON.parse(storedMealPlan));
+    const storedExercisePlan = localStorage.getItem(HEALTH_EXERCISE_PLAN_KEY); if (storedExercisePlan) setExercisePlan(JSON.parse(storedExercisePlan));
+    const storedJournalEntries = localStorage.getItem(HEALTH_JOURNAL_ENTRIES_KEY); if (storedJournalEntries) setJournalEntries(JSON.parse(storedJournalEntries));
+    const storedSymptomSessions = localStorage.getItem(HEALTH_SYMPTOM_SESSIONS_KEY); if (storedSymptomSessions) setSymptomSessions(JSON.parse(storedSymptomSessions));
+    const storedNutritionPrefs = localStorage.getItem(HEALTH_NUTRITION_PREFS_KEY); if (storedNutritionPrefs) setUserNutritionPreferences(storedNutritionPrefs);
+    const storedExercisePrefs = localStorage.getItem(HEALTH_EXERCISE_PREFS_KEY); if (storedExercisePrefs) setUserExercisePreferences(storedExercisePrefs);
+
+    const meditationContent = learningContent.find(lc => lc.id === 'lc-med');
+    if (meditationContent && !healthSuggestions.find(s => s.id === 'sugg-health-med')) {
+      setHealthSuggestions(prev => [...prev, {
+        id: 'sugg-health-med', type: 'content', itemId: meditationContent.id, title: meditationContent.title,
+        description: "برای کمک به مدیریت استرس و بهبود تمرکز، این محتوای مدیتیشن پیشنهاد می‌شود.",
+        sourceModule: 'Health', triggerContext: "هدف سلامتی: کاهش استرس",
+      }]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Removed learningContent, healthSuggestions from dependency array to avoid re-triggering
+
+  useEffect(() => { if(mealPlan) localStorage.setItem(HEALTH_MEAL_PLAN_KEY, JSON.stringify(mealPlan));}, [mealPlan]);
+  useEffect(() => { if(exercisePlan) localStorage.setItem(HEALTH_EXERCISE_PLAN_KEY, JSON.stringify(exercisePlan));}, [exercisePlan]);
+  useEffect(() => { localStorage.setItem(HEALTH_JOURNAL_ENTRIES_KEY, JSON.stringify(journalEntries));}, [journalEntries]);
+  useEffect(() => { localStorage.setItem(HEALTH_SYMPTOM_SESSIONS_KEY, JSON.stringify(symptomSessions));}, [symptomSessions]);
+  useEffect(() => { localStorage.setItem(HEALTH_NUTRITION_PREFS_KEY, userNutritionPreferences);}, [userNutritionPreferences]);
+  useEffect(() => { localStorage.setItem(HEALTH_EXERCISE_PREFS_KEY, userExercisePreferences);}, [userExercisePreferences]);
+  
+  useEffect(() => { chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });}, [currentSymptomSession?.messages]);
+
+
+  const handleGenerateMealPlan = async () => {
+    if (!ai) { showToast("سرویس هوش مصنوعی در دسترس نیست.", "error"); return; }
+    if (!userNutritionPreferences.trim()) { showToast("لطفاً ابتدا ترجیحات غذایی خود را وارد کنید.", "error"); return; }
+    setIsLoadingMealPlan(true);
+    setMealPlan(null);
+    try {
+        const prompt = `یک برنامه غذایی کامل ۷ روزه به زبان فارسی و در قالب JSON برای کاربر با ترجیحات زیر تولید کن: "${userNutritionPreferences}". ساختار JSON باید کاملاً مطابق با نوع MealPlan و زیرمجموعه‌های آن (DailyMealPlan, Meal) در TypeScript باشد: { "id": "string (شناسه تولیدی)", "title": "string (عنوان خلاقانه برای برنامه غذایی)", "startDate": "string (YYYY-MM-DD تاریخ امروز)", "durationDays": 7, "dailyPlans": [{ "dayOfWeek": "string ('شنبه' تا 'جمعه')", "meals": [{ "name": "string ('صبحانه'|'ناهار'|'شام'|'میان‌وعده')", "description": "string (توضیح کامل غذا)", "calories": number (اختیاری), "protein": number (اختیاری), "carbs": number (اختیاری), "fat": number (اختیاری), "notes": "string (اختیاری، مثلاً 'مخصوص گیاهخواران')" }], "dailyTotals": { "calories": number (اختیاری) }, "aiRationaleForDay": "string (اختیاری، توضیح برای انتخاب غذاهای این روز)" }], "aiGeneratedRationale": "string (توضیح کلی منطق برنامه)", "userPreferences": { "otherNotes": "${userNutritionPreferences}" } }. عنوان برنامه باید خلاقانه و مرتبط با ترجیحات باشد. کالری‌ها و دلایل اختیاری هستند اما ترجیح داده می‌شوند. مطمئن شو که هر روز شامل وعده‌های اصلی و حداقل یک میان‌وعده باشد.`;
+        
+        const response: GenerateContentResponse = await ai.models.generateContent({ model: AI_MODEL_NAME, contents: prompt, config: { responseMimeType: "application/json" } });
+        const parsedPlan = parseJsonFromString<MealPlan>(response.text);
+
+        if (parsedPlan && parsedPlan.dailyPlans && Array.isArray(parsedPlan.dailyPlans) && parsedPlan.dailyPlans.every(dp => dp.meals && Array.isArray(dp.meals))) {
+            parsedPlan.id = `mp-${Date.now()}`;
+            parsedPlan.startDate = new Date().toISOString().split('T')[0];
+            parsedPlan.userPreferences = { ...parsedPlan.userPreferences, otherNotes: userNutritionPreferences };
+            setMealPlan(parsedPlan);
+            showToast("برنامه غذایی با موفقیت تولید شد!", "success");
+        } else { throw new Error("فرمت پاسخ برنامه غذایی نامعتبر است یا شامل آرایه‌های مورد انتظار نیست."); }
+    } catch (e:any) { console.error("Error generating meal plan:", e); showToast(`خطا در تولید برنامه غذایی: ${e.message || "خطای ناشناخته"}`, "error"); }
+    finally { setIsLoadingMealPlan(false); }
+  };
+
+  const handleGenerateExercisePlan = async () => {
+    if (!ai) { showToast("سرویس هوش مصنوعی در دسترس نیست.", "error"); return; }
+    if (!userExercisePreferences.trim()) { showToast("لطفاً ابتدا ترجیحات ورزشی خود را وارد کنید.", "error"); return; }
+    setIsLoadingExercisePlan(true);
+    setExercisePlan(null);
+    try {
+        const prompt = `یک برنامه ورزشی هفتگی (مثلاً برای ۳ یا ۵ روز با روزهای استراحت) به زبان فارسی و در قالب JSON برای کاربر با ترجیحات زیر تولید کن: "${userExercisePreferences}". ساختار JSON باید مطابق با نوع ExercisePlan و زیرمجموعه‌های آن (DailyExercisePlan, Exercise) در TypeScript باشد: { "id": "string (شناسه تولیدی)", "title": "string (عنوان خلاقانه برای برنامه ورزشی)", "startDate": "string (YYYY-MM-DD تاریخ امروز)", "durationWeeks": number (مثلاً ۴), "weeklySchedule": [{ "dayOfWeek": "string ('شنبه' تا 'جمعه' یا 'هر روز')", "exercises": [{ "name": "string", "type": "string ('قدرتی'|'هوازی'|'کششی'|'ذهن و بدن')", "sets"?: number, "reps"?: string, "durationMinutes"?: number, "intensity"?: string ('کم'|'متوسط'|'زیاد'), "description"?: string, "notes"?: string }], "isRestDay"?: boolean, "aiRationaleForDay"?: string }], "aiGeneratedRationale"?: string, "userPreferences": { "otherNotes": "${userExercisePreferences}" } }. عنوان برنامه باید خلاقانه باشد.`;
+        const response: GenerateContentResponse = await ai.models.generateContent({ model: AI_MODEL_NAME, contents: prompt, config: { responseMimeType: "application/json" } });
+        const parsedPlan = parseJsonFromString<ExercisePlan>(response.text);
+        if (parsedPlan && parsedPlan.weeklySchedule && Array.isArray(parsedPlan.weeklySchedule) && parsedPlan.weeklySchedule.every(ws => Array.isArray(ws.exercises) || ws.isRestDay)) {
+            parsedPlan.id = `ep-${Date.now()}`;
+            parsedPlan.startDate = new Date().toISOString().split('T')[0];
+            parsedPlan.userPreferences = { ...parsedPlan.userPreferences, otherNotes: userExercisePreferences };
+            setExercisePlan(parsedPlan);
+            showToast("برنامه ورزشی با موفقیت تولید شد!", "success");
+        } else { throw new Error("فرمت پاسخ برنامه ورزشی نامعتبر است یا شامل آرایه‌های مورد انتظار نیست."); }
+    } catch (e:any) { console.error("Error generating exercise plan:", e); showToast(`خطا در تولید برنامه ورزشی: ${e.message || "خطای ناشناخته"}`, "error");}
+    finally { setIsLoadingExercisePlan(false); }
+  };
+
+  const handleAnalyzeJournalEntry = async () => {
+    if (!ai) { showToast("سرویس هوش مصنوعی در دسترس نیست.", "error"); return;}
+    if (!currentJournalInput.trim()) {showToast("لطفاً ابتدا متنی برای یادداشت وارد کنید.", "error"); return;}
+    setIsLoadingJournalAnalysis(true);
+    try {
+        const prompt = `متن یادداشت زیر را تحلیل کن: "${currentJournalInput}". یک تحلیل احساسات (شامل score عددی بین -۱ و ۱، یک label متنی فارسی مثل 'مثبت'، 'منفی'، 'خنثی'، 'بسیار مثبت'، 'بسیار منفی'، یک dominantEmotion به فارسی، و یک stressLevel به فارسی مثل 'کم'، 'متوسط'، 'زیاد'، 'بسیار زیاد'، 'نامشخص') و یک aiInsight (بینش کوتاه و مفید از یادداشت به فارسی) ارائه بده. پاسخ باید در قالب JSON با ساختار زیر باشد: { "sentimentAnalysis": { "score": number, "label": "string", "dominantEmotion": "string", "stressLevel": "string" }, "aiInsight": "string" }`;
+        const response: GenerateContentResponse = await ai.models.generateContent({ model: AI_MODEL_NAME, contents: prompt, config: { responseMimeType: "application/json" }});
+        const analysisResult = parseJsonFromString<{sentimentAnalysis: NonNullable<JournalEntryHealth['sentimentAnalysis']>, aiInsight: string}>(response.text);
+        if (analysisResult && analysisResult.sentimentAnalysis) {
+            const newEntry: JournalEntryHealth = {
+                id: `journal-${Date.now()}`, date: new Date().toISOString(), text: currentJournalInput,
+                sentimentAnalysis: analysisResult.sentimentAnalysis, aiInsight: analysisResult.aiInsight,
+            };
+            setJournalEntries(prev => [newEntry, ...prev]);
+            setCurrentJournalInput('');
+            showToast("تحلیل یادداشت با موفقیت انجام شد.", "success");
+        } else { throw new Error("فرمت پاسخ تحلیل نامعتبر است."); }
+    } catch (e:any) { console.error("Error analyzing journal:", e); showToast(`خطا در تحلیل یادداشت: ${e.message || "خطای ناشناخته"}`, "error"); }
+    finally { setIsLoadingJournalAnalysis(false); }
+  };
+
+  const handleSymptomChatSend = async () => {
+    if (!ai) { showToast("سرویس هوش مصنوعی در دسترس نیست.", "error"); return; }
+    if (!symptomInput.trim()) {showToast("لطفاً علائم خود را وارد کنید.", "error"); return;}
+    setIsLoadingSymptomResponse(true);
+    const userMessage: SymptomCheckMessage = { id: `symp-user-${Date.now()}`, sender: 'user', text: symptomInput, timestamp: new Date().toISOString() };
+    let sessionToUpdate = currentSymptomSession;
+
+    if (!sessionToUpdate) {
+        sessionToUpdate = {
+            id: `symp-sess-${Date.now()}`, userId: "user_placeholder_id", startTime: new Date().toISOString(),
+            userInitialSymptoms: symptomInput, messages: [userMessage], aiDisclaimerDisplayed: true, status: 'active'
+        };
+    } else {
+        sessionToUpdate = {...sessionToUpdate, messages: [...sessionToUpdate.messages, userMessage] };
+    }
+    setCurrentSymptomSession(sessionToUpdate);
+    const currentInputForPrompt = symptomInput;
+    setSymptomInput('');
+
+    try {
+        const conversationHistory = sessionToUpdate.messages.slice(-6).map(m => `${m.sender === 'user' ? 'کاربر' : 'دستیار'}: ${m.text}`).join('\n');
+        const prompt = `شما یک دستیار بررسی علائم هستید. کاربر با شما چت می‌کند. این یک ابزار تشخیصی نیست و صرفاً برای ارائه اطلاعات عمومی و پرسیدن سوالات شفاف کننده است. از ارائه تشخیص قطعی یا تجویز دارو خودداری کنید. کاربر به تازگی گفته: "${currentInputForPrompt}".\nتاریخچه اخیر گفتگو (در صورت وجود):\n${conversationHistory}\nپاسخ شما به زبان فارسی:`;
+        const response: GenerateContentResponse = await ai.models.generateContent({ model: AI_MODEL_NAME, contents: prompt });
+        const aiResponseText = response.text || "متاسفم، متوجه نشدم. می‌توانید واضح‌تر بگویید؟";
+        const aiMessage: SymptomCheckMessage = { id: `symp-ai-${Date.now()}`, sender: 'ai', text: aiResponseText, timestamp: new Date().toISOString() };
+        setCurrentSymptomSession(prev => prev ? {...prev, messages: [...prev.messages, aiMessage]} : null);
+    } catch (e:any) { 
+        console.error("Error in symptom chat:", e); 
+        const errorMsg: SymptomCheckMessage = { id: `symp-err-${Date.now()}`, sender: 'ai', text: "خطا در ارتباط با سرویس هوش مصنوعی.", timestamp: new Date().toISOString() };
+        setCurrentSymptomSession(prev => prev ? {...prev, messages: [...prev.messages, errorMsg]} : null);
+        showToast("خطا در چت بررسی علائم.", "error");
+    }
+    finally { setIsLoadingSymptomResponse(false); }
+  };
+
+  const handleEndSymptomChat = () => {
+    if (currentSymptomSession) {
+        const endedSession = {...currentSymptomSession, endTime: new Date().toISOString(), status: 'completed' as 'completed'};
+        setSymptomSessions(prev => [endedSession, ...prev.filter(s => s.id !== endedSession.id)]);
+        setCurrentSymptomSession(null);
+        showToast("جلسه بررسی علائم ذخیره شد.", "info");
+    }
+  };
+
+
+  const handleViewSuggestion = (type: LearningSuggestion['type'], itemId: string) => {
+    if (navigateTo) navigateTo('Learning', { view: 'detail', type, itemId });
+  };
+
+  return (
+    <div className="page bg-health-page">
+      {toast && <ToastNotification message={toast.text} type={toast.type} isVisible={!!toast} onClose={() => setToast(null)} />}
+      <header className="text-center mb-6 p-4 bg-gradient-to-br from-red-500 to-pink-600 rounded-b-xl shadow-lg text-white">
+        <PageIcon className="w-10 h-10 mx-auto mb-2" />
+        <h1 className="text-xl font-bold">{toPersianDigits("سلامت و بهزیستی یکپارچه")}</h1>
+        <p className="text-xs opacity-90">{toPersianDigits("ابزارهای هوشمند برای تغذیه، ورزش، ذهن و مراقبت از خود.")}</p>
+      </header>
+
+      {healthSuggestions.length > 0 && (
+        <CollapsibleSection title="پیشنهادات یادگیری سلامت محور" icon={<BookIcon className="text-red-500" />} className="mb-6" isOpen={openSections.learning} onToggle={() => toggleSection('learning')}>
+          <div className="space-y-3 p-2">
+            {healthSuggestions.map(suggestion => (
+              <AISmartLearningSuggestionCard key={suggestion.id} suggestion={suggestion} onViewSuggestion={handleViewSuggestion} />
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      <CollapsibleSection title="برنامه‌ریزی هوشمند تغذیه و ورزش" icon={<AiIcon className="text-red-500" />} className="mb-6" isOpen={openSections.planning} onToggle={() => toggleSection('planning')}>
+        <NutritionPlanner 
+          userNutritionPreferences={userNutritionPreferences}
+          setUserNutritionPreferences={setUserNutritionPreferences}
+          handleGenerateMealPlan={handleGenerateMealPlan}
+          isLoadingMealPlan={isLoadingMealPlan}
+          mealPlan={mealPlan}
+          ai={ai}
+        />
+        <div className="mt-4"> {/* Add margin between planners */}
+          <ExercisePlanner
+            userExercisePreferences={userExercisePreferences}
+            setUserExercisePreferences={setUserExercisePreferences}
+            handleGenerateExercisePlan={handleGenerateExercisePlan}
+            isLoadingExercisePlan={isLoadingExercisePlan}
+            exercisePlan={exercisePlan}
+            ai={ai}
+          />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="بینایی هوش مصنوعی برای سلامت (مفهومی)" icon={<CameraIcon className="text-red-500" />} className="mb-6" isOpen={openSections.vision} onToggle={() => toggleSection('vision')}>
+         <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-xs text-gray-600 space-y-1">
+            <p>{toPersianDigits("این بخش در آینده می‌تواند شامل قابلیت‌هایی مانند تشخیص غذا از روی عکس برای ثبت کالری و تحلیل فرم حرکات ورزشی با استفاده از دوربین دستگاه (با اجازه شما) باشد.")}</p>
+            <p className="font-semibold text-red-700">{toPersianDigits("توجه: پیاده‌سازی این ویژگی‌ها نیازمند مدل‌های AI بسیار پیشرفته و ملاحظات دقیق حریم خصوصی است.")}</p>
+         </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="تحلیل احساسات و استرس از دفترچه یادداشت" icon={<PencilSquareIcon className="text-red-500" />} className="mb-6" isOpen={openSections.journal} onToggle={() => toggleSection('journal')}>
+        <JournalAnalysis
+          currentJournalInput={currentJournalInput}
+          setCurrentJournalInput={setCurrentJournalInput}
+          handleAnalyzeJournalEntry={handleAnalyzeJournalEntry}
+          isLoadingJournalAnalysis={isLoadingJournalAnalysis}
+          journalEntries={journalEntries}
+          ai={ai}
+        />
+      </CollapsibleSection>
+      
+      <CollapsibleSection title="چت‌بات بررسی‌کننده علائم با AI" icon={<ChatIcon className="text-red-500" />} className="mb-6" isOpen={openSections.symptom} onToggle={() => toggleSection('symptom')}>
+        <SymptomCheckerChatbot
+          isSymptomDisclaimerAccepted={isSymptomDisclaimerAccepted}
+          setIsSymptomDisclaimerAccepted={setIsSymptomDisclaimerAccepted}
+          currentSymptomSession={currentSymptomSession}
+          symptomInput={symptomInput}
+          setSymptomInput={setSymptomInput}
+          handleSymptomChatSend={handleSymptomChatSend}
+          handleEndSymptomChat={handleEndSymptomChat}
+          isLoadingSymptomResponse={isLoadingSymptomResponse}
+          chatMessagesEndRef={chatMessagesEndRef}
+          ai={ai}
+        />
+      </CollapsibleSection>
+    </div>
+  );
+};
+
+export default HealthPage;
+
+```
+  </change>
+</changes>```
